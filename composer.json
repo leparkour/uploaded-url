@@ -1,0 +1,20 @@
+{
+    "name": "denisyukphp/uploaded-url",
+    "authors": [
+        {
+            "name": "Aleksandr Denisyuk",
+            "email": "a@denisyuk.by",
+            "homepage": "https://denisyuk.by",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=7",
+        "ext-curl": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Denisyuk\\": "src/",
+        }
+    }
+}
