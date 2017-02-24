@@ -18,17 +18,17 @@ class UploadedUrl extends File
            $curl       = [];
 
     private $tmpfile;
-
     private $curlHandler;
     private $fileHandler;
-    public  $errorMessage;
-    public  $errorCode;
+
+    public $errorMessage;
+    public $errorCode;
 
     public function __construct(
         string $url,
         array  $options = []
     ) {
-        $this->url = $url; // todo: isHttpUrl()
+        $this->url = $url;
 
         foreach ($options as $name => $value) {
             $this->{$name} = $value;
@@ -40,13 +40,13 @@ class UploadedUrl extends File
     public function __set($name, $value)
     {
         throw new \Error(
-            sprintf('The option "%s" does not exist in the configuration of class %s.', $name, __CLASS__)
+            sprintf('Опции "%s" не существует в конфигурации класса %s.', $name, __CLASS__)
         );
     }
 
     private function init()
     {
-        $this->tmpfile = new tmpfile;
+        $this->tmpfile = new \tmpfile;
 
         $this->request();
 
@@ -69,8 +69,6 @@ class UploadedUrl extends File
         $this->errorMessage = curl_error($this->curlHandler);
         $this->errorCode    = curl_errno($this->curlHandler);
 
-        // todo: curl_getinfo()
-
         fclose($this->fileHandler);
         curl_close($this->curlHandler);
     }
@@ -86,21 +84,17 @@ class UploadedUrl extends File
             ];
         }
 
-        if ($this->maxsize) { // todo: '32M' -> 1024 * 1024 * 32
+        if ($this->maxsize) {
             $default += [
                 CURLOPT_NOPROGRESS       => false,
                 CURLOPT_BUFFERSIZE       => $this->buffersize,
-                CURLOPT_PROGRESSFUNCTION => function ($ch, $dwnldSize, $dwnld, $upldSize, $upld) { // todo: вынести в отдельный метод
-                    if ($dwnld > $this->maxsize) {
-                        return -1;
-                    }
-                },
+                CURLOPT_PROGRESSFUNCTION => [$this, 'checkDownloadedBytes'],
             ];
         }
 
         $this->timeout and $default[CURLOPT_TIMEOUT] = $this->timeout;
 
-        $default[CURLOPT_USERAGENT] = $this->useragent ?? $_SERVER['HTTP_USER_AGENT'] ?? false;
+        $default[CURLOPT_USERAGENT] = $this->useragent ?? @$_SERVER['HTTP_USER_AGENT'];
 
         if ($this->redirects) {
             $default += [
@@ -115,6 +109,18 @@ class UploadedUrl extends File
         );
     }
 
+    private function checkDownloadedBytes(
+        $curlHandler,
+        $downloadSize,
+        $downloadedBytes,
+        $uploadSize,
+        $uploadedBytes
+    ) {
+        if ($downloadedBytes > $this->maxsize) {
+            return -1;
+        }
+    }
+
     public function isValid()
     {
         return $this->errorCode === CURLE_OK;
@@ -127,11 +133,10 @@ class UploadedUrl extends File
 
     public function getErrorMessage()
     {
-        if ($this->isValid()) {
-             return;
-        }
+        // if ($this->isValid()) {
+        //     return;
+        // }
 
-        // todo: перевести на английский?
         $errors = [
             /*  1 */ CURLE_UNSUPPORTED_PROTOCOL => 'Ссылка должна начинаться с http:// или https://.',
             /*  6 */ CURLE_COULDNT_RESOLVE_HOST => 'Укажите корректную ссылку на удалённый файл.',
@@ -141,12 +146,12 @@ class UploadedUrl extends File
 
         $message = isset($errors[$this->errorCode]) ?
                    $errors[$this->errorCode]        :
-                   'При загрузке удалённого файла "%s" произошла ошибка.'; // todo: перевести на английский?
+                   'При загрузке удалённого файла "%s" произошла ошибка.';
 
         return sprintf(
             $message,
             rawurldecode($this->url),
-            $this->maxsize / pow(1024, 2) // todo: 1024 * 1024 * 32 -> 32 MiB
+            $this->maxsize / pow(1024, 2)
         );
     }
 }
