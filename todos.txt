@@ -1,0 +1,39 @@
+todos:
+
+(1) Дать короткое название файлу для вывода ошибки, а если невозможно, то показать полный URL.
+    Пример: https://denisyuk.by/share/filename.zip -> filename.zip
+
+(2) Перевести на английский названия ошибок:
+    Опции "%s" не существует в конфигурации класса %s.   -> The option "%s" does not exist in the configuration of class %s.
+    Ссылка должна начинаться с http:// или https://.     -> The link has to start with http:// or https://.
+    Укажите корректную ссылку на удалённый файл.         -> Insert the valid link to the remote file.
+    По ссылке "%s" файл не найден.                       -> Followed the link "%s" file not found.
+    Файл "%s" не должен превышать %d Мбайт.              -> The file "%s" has not to exceed %d MiB.
+    При загрузке удалённого файла "%s" произошла ошибка. -> By downloading the remote file "%s" error has occured.
+
+(3) Написать ф-ю isHttpUrl() и применить в конструкторе для $url.
+    Это нужно для того, чтобы невилировать нагрузку на cURL при неверных запросах.
+
+(4) Настроить автообновление для сертификата.
+    Ссылка: https://curl.haxx.se/ca/cacert.pem
+
+(5) Написать метод fixSize() для перевода короткого значения 'maxsize' в байты.
+    Пример: '32M' -> 1024 * 1024 * 32
+
+(6) Написать метод formatBytes() для перевода байт в отформатированное международное значение.
+    Использовать для вывода ошибки CURLE_ABORTED_BY_CALLBACK.
+    Пример: 1024 * 1024 * 32 -> 32 MiB
+
+(7) Завести свойство $this->curlInfo и записать в него curl_getinfo().
+    Также дать ему метод getRequestInfo().
+
+(8) Сделать возможность наследовать UploadedUrl и использовать его методы.
+
+(9) Очистить $this->tmpfile, если есть ошибка CURLE_ABORTED_BY_CALLBACK.
+
+(10) Значение по умолчанию для CURLOPT_BUFFERSIZE установить в 1% от 'maxsize', если
+     'buffersize' установлен, но не меньше 1024. Для $this->buffersize прописать null.
+     Пример: $this->buffersize ?? ($buffersize = $this->maxsize * 0.01 > 1024) ? $buffersize : 1024
+
+(11) В $this->prepareOptions() запретить перезапизывать базовые опции CURLOPT_FAILONERROR,
+     CURLOPT_PROTOCOLS и CURLOPT_FILE, которые приходят через массив дополнительных настроек 'curl'.
