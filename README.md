@@ -52,3 +52,5 @@ try {
      echo $e->getMessage();
 }
 ```
+
+[![Favicon](https://hsto.org/files/e9b/a97/31d/e9ba9731d607484cb3abfdd51fd494d5.png)](https://denisyuk.by) [Александр Денисюк](https://denisyuk.by), 2017
