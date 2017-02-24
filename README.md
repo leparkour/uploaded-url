@@ -46,10 +46,8 @@ try {
     }
     
     echo $file->getMimeType();
-    
-    /* ... */
 } catch (UrlException $e) {
-     echo $e->getMessage();
+     /* ... */
 }
 ```
 
