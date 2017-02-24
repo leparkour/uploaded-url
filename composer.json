@@ -11,7 +11,8 @@
     "require": {
         "php": ">=7",
         "ext-curl": "*",
-        "symfony/http-foundation": "^3.2"
+        "symfony/http-foundation": "^3.2",
+        "denisyukphp/tmpfile": "^1.0",
     },
     "autoload": {
         "psr-4": {
