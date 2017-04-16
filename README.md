@@ -46,6 +46,8 @@ try {
     }
     
     echo $file->getMimeType();
+    
+    $file->move(__DIR__ . '/files', 'custom-name.jpg');
 } catch (UrlException $e) {
      /* ... */
 }
