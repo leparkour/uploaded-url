@@ -6,6 +6,18 @@ use Symfony\Component\HttpFoundation\File\File;
 
 class UploadedUrl extends File
 {
+    /**
+     * @var string $url
+     * @var bool   $verify
+     * @var string $cert
+     * @var mixed  $maxsize
+     * @var int    $timeout
+     * @var string $useragent
+     * @var int    $buffersize
+     * @var bool   $redirects
+     * @var int    $maxredirs
+     * @var array  $curl
+     */
     public $url,
            $verify     = true,
            $cert       = 'cacert.pem',
@@ -20,9 +32,8 @@ class UploadedUrl extends File
     private $tmpfile;
     private $curlHandler;
     private $fileHandler;
-
-    public $errorMessage;
-    public $errorCode;
+    private $errorMessage;
+    private $errorCode;
 
     public function __construct(
         string $url,
@@ -133,9 +144,9 @@ class UploadedUrl extends File
 
     public function getErrorMessage()
     {
-        // if ($this->isValid()) {
-        //     return;
-        // }
+        if ($this->isValid()) {
+            return null;
+        }
 
         $errors = [
             /*  1 */ CURLE_UNSUPPORTED_PROTOCOL => 'Ссылка должна начинаться с http:// или https://.',
@@ -144,9 +155,9 @@ class UploadedUrl extends File
             /* 42 */ CURLE_ABORTED_BY_CALLBACK  => 'Файл "%s" не должен превышать %d Мбайт.',
         ];
 
-        $message = isset($errors[$this->errorCode]) ?
-                   $errors[$this->errorCode]        :
-                   'При загрузке удалённого файла "%s" произошла ошибка.';
+        $message = isset($errors[$this->errorCode])
+            ? $errors[$this->errorCode]
+            : 'При загрузке удалённого файла "%s" произошла ошибка.';
 
         return sprintf(
             $message,
