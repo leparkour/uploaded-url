@@ -17,7 +17,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Denisyuk\\": "src/"
+            "Denisyuk\\UploadedUrl\\": "src/"
         }
     }
 }
