@@ -37,3 +37,13 @@ todos:
 
 (11) В $this->prepareOptions() запретить перезапизывать базовые опции CURLOPT_FAILONERROR,
      CURLOPT_PROTOCOLS и CURLOPT_FILE, которые приходят через массив дополнительных настроек 'curl'.
+
+(12) Вынести конфигурацию в отдельный класс Denisyuk\UploadedUrl\Config и сделать
+     зависимым вторым аргументом в Denisyuk\UploadedUrl\UploadedUrl. В конфиге должны
+     собираться опции cURL всего один раз.
+
+(13) Создать класс Denisyuk\UploadedUrl\CacertUpdate, который в __construct()
+     будет принимать путь к файлу cacert.pem и через __toString() возвращать
+     тот же путь к сертификату, но уже обновлённый.
+
+(14) Завести отдельные исключения для конфигурации и процесса загрузки.

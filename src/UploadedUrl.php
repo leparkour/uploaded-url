@@ -1,26 +1,26 @@
 <?php
 
-namespace Denisyuk;
+namespace Denisyuk\UploadedUrl;
 
 use Symfony\Component\HttpFoundation\File\File;
 
 class UploadedUrl extends File
 {
     /**
-     * @var string $url
-     * @var bool   $verify
-     * @var string $cert
-     * @var mixed  $maxsize
-     * @var int    $timeout
-     * @var string $useragent
-     * @var int    $buffersize
-     * @var bool   $redirects
-     * @var int    $maxredirs
-     * @var array  $curl
+     * @var string $url        Ссылка на удалённый файл по протоколу http:// или https://.
+     * @var bool   $verify     Включить проверку хоста по указанному CA-сертификату.
+     * @var string $cert       Имя файла или директории с CA-сертификатами.
+     * @var int    $maxsize    Максимальный размер файла в байтах.
+     * @var int    $timeout    Лимит на выполнение cURL в секундах.
+     * @var string $useragent  Содержимое заголовка "User-Agent", посылаемого в HTTP-запросе.
+     * @var int    $buffersize Размер буфера в байтах.
+     * @var bool   $redirects  Разрешить следовать перенаправлениям по заголовку "Location".
+     * @var int    $maxredirs  Максимальное количество принимаемых перенаправлений.
+     * @var array  $curl       Произвольные опции cURL.
      */
     public $url,
            $verify     = true,
-           $cert       = 'cacert.pem',
+           $cert       = __DIR__ . '/cacert.pem',
            $maxsize,   // null
            $timeout,   // null
            $useragent, // null
@@ -29,11 +29,30 @@ class UploadedUrl extends File
            $maxredirs  = 10,
            $curl       = [];
 
+    /**
+     * @var \tmpfile Класс для работы с временным файлом.
+     */
     private $tmpfile;
+
+    /**
+     * @var resource Дескриптор cURL.
+     */
     private $curlHandler;
+
+    /**
+     * @var resource Дескриптор временного файла.
+     */
     private $fileHandler;
-    private $errorMessage;
+
+    /**
+     * @var int Код ошибки cURL.
+     */
     private $errorCode;
+
+    /**
+     * @var string Текстовое сообщение ошибки cURL.
+     */
+    private $errorMessage;
 
     public function __construct(
         string $url,
@@ -51,7 +70,7 @@ class UploadedUrl extends File
     public function __set($name, $value)
     {
         throw new \Error(
-            sprintf('Опции "%s" не существует в конфигурации класса %s.', $name, __CLASS__)
+            sprintf('Опции "%s" не существует в конфигурации класса %s', $name, __CLASS__)
         );
     }
 
@@ -84,31 +103,31 @@ class UploadedUrl extends File
         curl_close($this->curlHandler);
     }
 
-    private function prepareOptions(array $default)
+    private function prepareOptions(array $options)
     {
         if ($this->verify) {
-            $default[is_dir($this->cert) ? CURLOPT_CAPATH : CURLOPT_CAINFO] = $this->cert;
+            $options[is_dir($this->cert) ? CURLOPT_CAPATH : CURLOPT_CAINFO] = $this->cert;
         } else {
-            $default += [
+            $options += [
                 CURLOPT_SSL_VERIFYPEER => false,
                 CURLOPT_SSL_VERIFYHOST => false,
             ];
         }
 
         if ($this->maxsize) {
-            $default += [
+            $options += [
                 CURLOPT_NOPROGRESS       => false,
                 CURLOPT_BUFFERSIZE       => $this->buffersize,
                 CURLOPT_PROGRESSFUNCTION => [$this, 'checkDownloadedBytes'],
             ];
         }
 
-        $this->timeout and $default[CURLOPT_TIMEOUT] = $this->timeout;
+        $this->timeout and $options[CURLOPT_TIMEOUT] = $this->timeout;
 
-        $default[CURLOPT_USERAGENT] = $this->useragent ?? @$_SERVER['HTTP_USER_AGENT'];
+        $options[CURLOPT_USERAGENT] = $this->useragent ?? @$_SERVER['HTTP_USER_AGENT'];
 
         if ($this->redirects) {
-            $default += [
+            $options += [
                 CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_MAXREDIRS      => $this->maxredirs,
             ];
@@ -116,7 +135,7 @@ class UploadedUrl extends File
 
         return curl_setopt_array(
             $this->curlHandler,
-            $default += $this->curl
+            $options += $this->curl
         );
     }
 
